@@ -1,11 +1,10 @@
 from aiogram.utils import executor
 import logging
 from config import dp
-from handlers import client, extra, call_back, admin
+from handlers import client, extra, call_back
 
 call_back.register_handlers_callback(dp)
 client.register_handlers_client(dp)
-#admin.register_handlers_admin(dp)
 extra.register_handlers_extra(dp)
 
 if __name__ == '__main__':
