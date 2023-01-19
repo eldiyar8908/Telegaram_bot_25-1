@@ -1,7 +1,7 @@
 from aiogram import types, Dispatcher
-from config import bot
+from handlers.config import bot, ADMINS
 from random import randint
-from config import ADMINS
+
 
 async def echo(message: types.Message):
     if message.text.startswith('game'):
@@ -26,12 +26,15 @@ async def echo(message: types.Message):
         else:
             await message.answer('Пиши в группу!')
     if message.text == '!pin':
-        await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+        try:
+            await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+        except AttributeError:
+            bot.send_message(message.from_user.id, 'Сообщение должно быть ответом на длугое сообщение!!!')
     elif message.chat.type == 'private':
         if message.text.isdigit():
             await bot.send_message(chat_id=message.chat.id, text=int(message.text) * int(message.text))
         else:
-            await bot.ba(chat_id=message.chat.id, text=message.text)
+            await bot.send_message(chat_id=message.chat.id, text=message.text)
 
 
 def register_handlers_extra(dp: Dispatcher):
