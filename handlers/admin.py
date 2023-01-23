@@ -28,3 +28,6 @@ async def games(message: types.Message):
 
 def register_handlers_admin(dp):
     dp.register_message_handler(games)
+
+
+

@@ -2,13 +2,12 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from handlers.config import mentors_id
-from random import randint
-from config import ADMINS
+from handlers.config import mentors_id, ADMINS
+from data_base.bot_db import sql_command_insert
 
 
 class FSMAdmin(StatesGroup):
-    mentors_id = State()
+    id = State()
     name = State()
     direction = State()
     age = State()
@@ -17,25 +16,24 @@ class FSMAdmin(StatesGroup):
 
 
 async def fsm_start(message: types.Message, state: FSMContext):
-    if message.from_user.id in ADMINS:
-        if message.chat.type == 'private':
-            await FSMAdmin.mentors_id.set()
-            while True:
-                id = randint(100000,999999)
-                if id not in mentors_id:
-                    async with state.proxy() as data:
-                        data['mentors_id'] = id
-                    mentors_id.append(id)
-                    break
-            await FSMAdmin.next()
-            await message.answer('Как зовут?')
-        else:
-            await message.answer("Пиши в личку!")
-    else:
-        await message.answer('Только админы!!')
+    if message.from_user.id in ADMINS and message.chat.type == 'private':
+        await FSMAdmin.id.set()
+        await message.answer('id?')
 
+    elif message.from_user.id not in ADMINS:
+        await message.answer('Ты не админ!')
+    elif message.chat.type != 'private':
+        await message.answer('пиши в личку!')
+
+async def load_id(message: types.Message, state: FSMContext):
+    if message.text.isnumeric():
+        async with state.proxy() as data:
+            data['id'] = message.text
+        await FSMAdmin.next()
+        await message.answer("Имя?")
 
 async def load_name(message: types.Message, state: FSMContext):
+
     async with state.proxy() as data:
         data['name'] = message.text
     await FSMAdmin.next()
@@ -68,11 +66,16 @@ async def load_group(message: types.Message, state: FSMContext):
         await message.answer(
             f"{data['name']}, {data['age']}, {data['direction']}, {data['group']}, "
         )
+        await message.answer('всё правильно?')
+        await FSMAdmin.next()
 
 
 async def submit(message: types.Message, state: FSMContext):
     if message.text.lower() == "да":
+        await sql_command_insert(state)
         await state.finish()
+        await message.answer('ты зареган!!')
+
     elif message.text.lower() == "нет":
         await state.finish()
     else:
@@ -93,8 +96,12 @@ def register_handlers_anketa(dp: Dispatcher):
                                 state='*')
 
     dp.register_message_handler(fsm_start, commands=['reg'])
+    dp.register_message_handler(load_id, state=FSMAdmin.id)
     dp.register_message_handler(load_name, state=FSMAdmin.name)
     dp.register_message_handler(load_age, state=FSMAdmin.age)
     dp.register_message_handler(load_direction, state=FSMAdmin.direction)
     dp.register_message_handler(load_group, state=FSMAdmin.group)
     dp.register_message_handler(submit, state=FSMAdmin.submit)
+
+
+
