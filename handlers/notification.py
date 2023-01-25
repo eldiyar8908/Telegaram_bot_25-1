@@ -17,7 +17,7 @@ async def last_day():
 
 
 async def scheduler():
-    aioschedule.every().day.at('21:33').do(last_day)
+    aioschedule.every().saturday.at('20:30').do(last_day)
     while 1:
         await aioschedule.run_pending()
         await asyncio.sleep(60)
