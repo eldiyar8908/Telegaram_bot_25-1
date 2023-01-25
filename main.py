@@ -1,5 +1,3 @@
-import asyncio
-
 from aiogram.utils import executor
 import logging
 from handlers import client, extra, call_back, fsmAdminMentor
