@@ -1,10 +1,21 @@
+import os
+
 from aiogram import types, Dispatcher
 from handlers.config import bot, ADMINS
 from random import randint
-
+from pytube import YouTube
 
 async def echo(message: types.Message):
-    if message.text.startswith('game'):
+    if message.text.startswith('https://www.youtube.com'):
+        url = message.text
+        video = YouTube(url=url)
+        await bot.send_message(message.from_user.id, 'Скачивание началось. Ожидайте!')
+        stream = video.streams.filter(progressive=True, file_extension='mp4')
+        stream.get_highest_resolution().download(f'{message.chat.id}', f'{message.chat.id}_{video.title}' )
+        with open(f'{message.chat.id}/{message.chat.id}_{video.title}', 'rb') as video1:
+            await bot.send_video(message.chat.id, video=video1)
+            os.remove(f'{message.chat.id}/{message.chat.id}_{video.title}')
+    elif message.text.startswith('game'):
         if message.chat.type != 'private':
             if message.from_user.id not in ADMINS:
                 await message.answer('Ты не админ! Иди, отдыхай)')
@@ -25,7 +36,7 @@ async def echo(message: types.Message):
                     await bot.send_dice(userID, emoji='🎰')
         else:
             await message.answer('Пиши в группу!')
-    if message.text == '!pin':
+    elif message.text == '!pin':
         try:
             await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
         except AttributeError:
