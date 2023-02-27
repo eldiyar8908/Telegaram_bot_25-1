@@ -5,7 +5,6 @@ storage = MemoryStorage()
 
 
 TOKEN = config('TOKEN')
-PRICE = types.LabeledPrice(label='Премиум', amount=500*100)
 bot = Bot(TOKEN)
 dp = Dispatcher(bot=bot, storage=storage)
 ADMINS = (1147816412, )
