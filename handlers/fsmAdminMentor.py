@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from handlers.config import mentors_id, ADMINS
+from handlers.config import ADMINS
 from data_base.bot_db import sql_command_insert
 
 
@@ -15,7 +15,7 @@ class FSMAdmin(StatesGroup):
     submit = State()
 
 
-async def fsm_start(message: types.Message, state: FSMContext):
+async def fsm_start(message: types.Message):
     if message.from_user.id in ADMINS and message.chat.type == 'private':
         await FSMAdmin.id.set()
         await message.answer('id?')
